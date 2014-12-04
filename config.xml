@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.edu20.EDU20IOS" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="com.edu20.NEOLMS" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
     <name>NEO</name>
     <description>
         Get the full functionality of NEO LMS by using the IOS Mobile App. NEO is a simple, powerful LMS for schools and universities that makes it easy to deliver online education.
