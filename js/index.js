@@ -47,8 +47,6 @@ var app = {
         document.addEventListener('pause', this.onPause, false);
         document.addEventListener('deviceready', this.onAppLaunch, false);
         document.addEventListener('deviceready', this.onDeviceReady, false);
-        
-        app.checkConnection();
     },
 
     onDeviceReady: function(){
@@ -138,26 +136,6 @@ var app = {
             contentFrame.contentWindow.location = loginUrl;
         }*/
     },
-    checkConnection: function(){
-        var networkState = navigator.connection.type;
-        
-        var states = {};
-        states[Connection.UNKNOWN]  = 'Unknown connection';
-        states[Connection.ETHERNET] = 'Ethernet connection';
-        states[Connection.WIFI]     = 'WiFi connection';
-        states[Connection.CELL_2G]  = 'Cell 2G connection';
-        states[Connection.CELL_3G]  = 'Cell 3G connection';
-        states[Connection.CELL_4G]  = 'Cell 4G connection';
-        states[Connection.NONE]     = 'No network connection';
-        
-        if(networkState == Connection.UNKNOWN || networkState == Connection.NONE) {
-            
-            app.updateStatusMessage('Error Loading: '+states[networkState]);
-            return false;
-        }
-        
-        return true;
-    },
     checkReachable: function(){
         //store.clear();
         $.ajax(domainProtocol+'://'+domain, {
@@ -216,14 +194,11 @@ var app = {
         app.updateStatusMessage('');
         isPageLoaded = false;
         
-        if(app.checkConnection()) {
-            //connectionTimeout = setTimeout(app.checkTimeout,connectionTimeoutSeconds*1000);
-            app.toggleLoader(true);
+        app.toggleLoader(true);
             
-            if(isFirst) {
-                app.updateStatusMessage('Loading...');
-                isFirst = false;
-            }
+        if(isFirst) {
+            app.updateStatusMessage('Loading...');
+            isFirst = false;
         }
     },
     loadPrevious: function()
@@ -475,7 +450,7 @@ var app = {
                 if(typeof data.content != 'undefined'){
                     $('#courseToolbar').html(data.content);
                     $('#courseToolbar').css({
-                        top: parseFloat(window.device.version) >= 7.0 ? 60 : 40,
+                        top: !navigator.userAgent.match(/Android/i) && parseFloat(window.device.version) >= 7.0 ? 60 : 40,
                         width: $(window).width() - 234,
                     });
                     $('#courseToolbar').show();
@@ -598,10 +573,14 @@ var app = {
     },
     onAppLaunch: function(){
         //console.log('checking if file was selected');
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFS, app.fail);
+        if(!navigator.userAgent.match(/Android/i)){
+        	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFS, app.fail);
+        }
     },
     onPause: function(){
-        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFSforDelete, app.fail);
+    	if(!navigator.userAgent.match(/Android/i)){
+        	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFSforDelete, app.fail);
+        }
     },
     gotFSforDelete: function(fileSystem){
         fileSystem.root.getDirectory('Inbox', {create: false}, app.readInboxForDelete, app.fail);
@@ -738,7 +717,7 @@ var app = {
                 'position': 'static',
                 'margin-left': $('nav#user-menu').outerWidth()
             });
-            if(parseFloat(window.device.version) < 8.0){
+            if(!navigator.userAgent.match(/Android/i) && parseFloat(window.device.version) < 8.0){
                 if($('nav#user-menu #btn-root').is(':visible')){
                     $('nav#user-menu #btn-root').click();
                     setTimeout(function(){$('nav#user-menu #btn-down').click();},1);
@@ -819,7 +798,7 @@ function inputFocusedActions(){
         $('header').css({'position': 'absolute', 'top': 0, 'overflow': 'hidden'});
     }
     $('#infoBar').hide();
-    if(parseFloat(window.device.version) >= 7.0){
+    if(!navigator.userAgent.match(/Android/i) && parseFloat(window.device.version) >= 7.0){
         setTimeout(function(){
             $('#chatContainer').css('bottom', -100)
         }, 100);
