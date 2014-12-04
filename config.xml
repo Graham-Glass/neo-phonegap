@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.edu20.EDU20IOS" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
-    <name>EDU 2.0</name>
+    <name>NEO</name>
     <description>
-        Hello World sample application that responds to the deviceready event.
+        Get the full functionality of NEO LMS by using the IOS Mobile App. NEO is a simple, powerful LMS for schools and universities that makes it easy to deliver online education.
     </description>
-    <author email="support@phonegap.com" href="http://phonegap.com">
-        PhoneGap Team
+    <author email="graham@neolms.com" href="http://www.neolms.com">
+        NEO LMS Team
     </author>
     <feature name="http://api.phonegap.com/1.0/device" />
     <preference name="permissions" value="none" />
