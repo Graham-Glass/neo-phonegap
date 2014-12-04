@@ -967,7 +967,7 @@ $(document).ready(function(){
                   
     $(window).resize(function(){
         if($(window).height() == originalWidth && $(window).width() == originalHeight){
-            $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - 20});
+            $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 0 : 20)});
             $('header').css('width', $(window).width());
             originalHeight = $(window).height();
             originalWidth = $(window).width();
@@ -984,7 +984,7 @@ $(document).ready(function(){
         }
     });
                   
-    $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - 20});
+    $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 0 : 20)});
     $('header').css('width', $(window).width());
     
     $('.sendContent').click(function(){
