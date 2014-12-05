@@ -964,7 +964,12 @@ $(document).ready(function(){
             $(window).scrollTop(0);
         }
     });
-                  
+    
+    if(navigator.userAgent.match(/Android/i)){
+    	$('body').css('margin', 0);
+    	$('header').css('border', 'none');
+    }
+    
     $(window).resize(function(){
         if($(window).height() == originalWidth && $(window).width() == originalHeight){
             $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 0 : 20)});
