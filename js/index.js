@@ -280,7 +280,11 @@ var app = {
                 if(data.action == 'login'){
                     //console.log('Logging in');
                     loggedIn = true;
-                    $('header').show();
+                    
+                    if(!navigator.userAgent.match(/Android/i)){
+                    	$('header').show();
+                    }
+                    
                     var contentFrame = document.getElementById('contentFrame');
                     
                     if(!wentBack && !wentForward){
@@ -447,16 +451,18 @@ var app = {
                 }
                 break;
             case 'courseToolbar':
-                if(typeof data.content != 'undefined'){
-                    $('#courseToolbar').html(data.content);
-                    $('#courseToolbar').css({
-                        top: !navigator.userAgent.match(/Android/i) && parseFloat(window.device.version) >= 7.0 ? 60 : 40,
-                        width: $(window).width() - 234,
-                    });
-                    $('#courseToolbar').show();
-                }
-                if(typeof data.hide != 'undefined'){
-                    $('#courseToolbar').hide();
+            	if(!navigator.userAgent.match(/Android/i)){
+					if(typeof data.content != 'undefined'){
+						$('#courseToolbar').html(data.content);
+						$('#courseToolbar').css({
+							top: parseFloat(window.device.version) >= 7.0 ? 60 : 40,
+							width: $(window).width() - 234,
+						});
+						$('#courseToolbar').show();
+					}
+					if(typeof data.hide != 'undefined'){
+						$('#courseToolbar').hide();
+					}
                 }
                 break;
             case 'openExternal':
@@ -491,7 +497,7 @@ var app = {
                 break;
             case 'faceboxClosed':
                 if(data.content == '1'){
-                    if($('nav#leftColumn').attr('stays-visible') == 'yes'){
+                    if($('nav#leftColumn').attr('stays-visible') == 'yes' && !navigator.userAgent.match(/Android/i)){
                         $('nav#leftColumn').show();
                     }
                     $('nav#leftColumn').removeAttr('stays-visible');
@@ -699,7 +705,9 @@ var app = {
         hookFlyOutEvents('thinMainNav');
     },
     showLeftNav: function(){
-        $('nav#leftColumn').show();
+    	if(!navigator.userAgent.match(/Android/i)){
+        	$('nav#leftColumn').show();
+        }
     },
     hideLeftNav: function(){
         $('nav#leftColumn').hide();
@@ -745,7 +753,9 @@ function popup_clicked(element){
     closeThinNav();
     $('nav#leftColumn').hide();
     setTimeout(function(){
-        $('nav#leftColumn').show();
+    	if(!navigator.userAgent.match(/Android/i)){
+        	$('nav#leftColumn').show();
+        }
     }, 50);
     if($(window).width() > 980){
        app.refreshHeader();
