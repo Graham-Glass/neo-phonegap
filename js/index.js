@@ -978,20 +978,23 @@ $(document).ready(function(){
     if(navigator.userAgent.match(/Android/i)){
     	$('body').css('margin', 0);
     	$('header').css('border', 'none');
+    	$('#contentFrame').css({width: '100%', height: '100%'});
     }
     
     $(window).resize(function(){
-        if($(window).height() == originalWidth && $(window).width() == originalHeight){
-            $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 0 : 20)});
-            $('header').css('width', $(window).width());
-            originalHeight = $(window).height();
-            originalWidth = $(window).width();
-        }else{
-            if($(window).height() < originalHeight){
-                inputFocusedActions();
-            }else{
-                inputBlurredActions();
-            }
+    	if(!navigator.userAgent.match(/Android/i)){
+			if($(window).height() == originalWidth && $(window).width() == originalHeight){
+				$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 0 : 20)});
+				$('header').css('width', $(window).width());
+				originalHeight = $(window).height();
+				originalWidth = $(window).width();
+			}else{
+				if($(window).height() < originalHeight){
+					inputFocusedActions();
+				}else{
+					inputBlurredActions();
+				}
+			}
         }
         
         if($(window).width() > 980){
