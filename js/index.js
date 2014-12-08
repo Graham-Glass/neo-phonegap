@@ -1001,9 +1001,11 @@ $(document).ready(function(){
             $("#user-menu").trigger( "close.mm" );
         }
     });
-                  
-    $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 0 : 20)});
-    $('header').css('width', $(window).width());
+    
+    if(!navigator.userAgent.match(/Android/i)){              
+    	$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - 20});
+    	$('header').css('width', $(window).width());
+    }
     
     $('.sendContent').click(function(){
         $('#infoBar').show();
