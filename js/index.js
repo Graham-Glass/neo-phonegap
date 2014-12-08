@@ -982,20 +982,18 @@ $(document).ready(function(){
     }
     
     $(window).resize(function(){
-    	if(!navigator.userAgent.match(/Android/i)){
-			if($(window).height() == originalWidth && $(window).width() == originalHeight){
-				$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 0 : 20)});
-				$('header').css('width', $(window).width());
-				originalHeight = $(window).height();
-				originalWidth = $(window).width();
+		if($(window).height() == originalWidth && $(window).width() == originalHeight){
+			$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 20)});
+			$('header').css('width', $(window).width());
+			originalHeight = $(window).height();
+			originalWidth = $(window).width();
+		}else if(!navigator.userAgent.match(/Android/i)){
+			if($(window).height() < originalHeight){
+				inputFocusedActions();
 			}else{
-				if($(window).height() < originalHeight){
-					inputFocusedActions();
-				}else{
-					inputBlurredActions();
-				}
+				inputBlurredActions();
 			}
-        }
+		}
         
         if($(window).width() > 980){
             $("#user-menu").trigger( "close.mm" );
@@ -1003,7 +1001,7 @@ $(document).ready(function(){
     });
     
     if(!navigator.userAgent.match(/Android/i)){              
-    	$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - 20});
+    	$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 20)});
     	$('header').css('width', $(window).width());
     }
     
