@@ -978,7 +978,6 @@ $(document).ready(function(){
     if(navigator.userAgent.match(/Android/i)){
     	$('body').css('margin', 0);
     	$('header').css('border', 'none');
-    	$('#contentFrame').css({width: '100%', height: '100%'});
     }
     
     $(window).resize(function(){
@@ -1000,10 +999,8 @@ $(document).ready(function(){
         }
     });
     
-    if(!navigator.userAgent.match(/Android/i)){              
-    	$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 20)});
-    	$('header').css('width', $(window).width());
-    }
+    $('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 20)});
+    $('header').css('width', $(window).width());
     
     $('.sendContent').click(function(){
         $('#infoBar').show();
