@@ -981,7 +981,7 @@ $(document).ready(function(){
     }
     
     $(window).resize(function(){
-		if($(window).height() == originalWidth && $(window).width() == originalHeight){
+		if( ($(window).height() == originalWidth && $(window).width() == originalHeight) || navigator.userAgent.match(/Android/i) ){
 			$('body, #contentFrame, #loadingOverlay').css({width: $(window).width(), height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 20)});
 			$('header').css('width', $(window).width());
 			originalHeight = $(window).height();
