@@ -569,6 +569,13 @@ var app = {
                     store.clear();
                 }
             break;
+            case 'refreshBodyHeight':
+            	if(typeof data.value != 'undefined'){
+            		var body_height = $('body').css('height');
+            		$('body').css('height', 0);
+            		$('body').css('height', body_height);
+            	}
+            	break;
             default:
                 return;
                 break;
