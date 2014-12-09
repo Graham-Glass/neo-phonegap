@@ -571,6 +571,7 @@ var app = {
             break;
             case 'refreshBodyHeight':
             	if(typeof data.value != 'undefined'){
+            		console.log('refreshing body height');
             		var body_height = $('body').css('height');
             		$('body').css('height', 0);
             		$('body').css('height', body_height);
