@@ -62,6 +62,6 @@
     <content src="index.html" />
 	<gap:platform name="android" />
 	<gap:config-file platform="android" parent="/manifest">
-     <application android:debuggable="true" />
+     <application android:debuggable="false" />
 	</gap:config-file>
 </widget>
