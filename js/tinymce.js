@@ -2,7 +2,7 @@ if( window.xhr ) {
 	window.tinymce.dom.Event.domLoaded = true;
 }
 
-var versionForPath = '4.1.3';
+var versionForPath = '4.1.6';
 
 function tinyMCEenable(selector, directionality, hgt, languageUsed) {	
 	if(document.body.clientWidth <= 768)
@@ -17,10 +17,10 @@ function tinyMCEenable(selector, directionality, hgt, languageUsed) {
 		case "si" : languageUsed = "sl"; break;
 	}
 	
-	tinymce.baseURL = domainProtocol + "://" + domain + "/tinymce/" + versionForPath + "/js/tinymce";
-	tinymce.baseURI.directory = domainProtocol + "://" + domain + "/tinymce/" + versionForPath + "/js/tinymce";
-	tinymce.baseURI.path = domainProtocol + "://" + domain + "/tinymce/" + versionForPath + "/js/tinymce";
-	tinymce.baseURI.relative = domainProtocol + "://" + domain + "/tinymce/" + versionForPath + "/js/tinymce";
+	tinymce.baseURL = schoolProtocol + "://" + schoolDomain + "/tinymce/" + versionForPath + "/js/tinymce";
+	tinymce.baseURI.directory = schoolProtocol + "://" + schoolDomain + "/tinymce/" + versionForPath + "/js/tinymce";
+	tinymce.baseURI.path = schoolProtocol + "://" + schoolDomain + "/tinymce/" + versionForPath + "/js/tinymce";
+	tinymce.baseURI.relative = schoolProtocol + "://" + schoolDomain + "/tinymce/" + versionForPath + "/js/tinymce";
 	
 	// console.log('[loading the tinymce ' + versionForPath + ' source]');
 	
@@ -44,7 +44,7 @@ function tinyMCEenable(selector, directionality, hgt, languageUsed) {
 		valid_elements: "*[*]",
 		valid_children: "*[*]",
 		spellchecker_languages: languageUsed,
-		spellchecker_rpc_url: domainProtocol + "://" + domain + "/tinymce/spellchecker",
+		spellchecker_rpc_url: schoolProtocol + "://" + schoolDomain + "/tinymce/spellchecker",
 		plugins: [
 			"advlist autolink link image imageupload fileupload lists charmap print preview hr anchor pagebreak",
 			"searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
@@ -54,7 +54,7 @@ function tinyMCEenable(selector, directionality, hgt, languageUsed) {
 		toolbar2: "formatselect fontselect fontsizeselect bullist numlist forecolor backcolor link unlink hr imageupload emoticons matheditor charmap poodll_audiorec",
 		menubar: false,
 		height: hgt,
-		content_css: [( directionality == "rtl" ? domainProtocol + "://" + domain + '/stylesheets/editor_new.rtl.css?12' : domainProtocol + "://" + domain + '/stylesheets/editor_mobile_app.css?12'),/* portal_stylesheet_url*/],
+		content_css: [( directionality == "rtl" ? schoolProtocol + "://" + schoolDomain + '/stylesheets/editor_new.rtl.css?12' : schoolProtocol + "://" + schoolDomain + '/stylesheets/editor_mobile_app.css?12'),/* portal_stylesheet_url*/],
 		block_formats: "Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3;Header 4=h4;Header 5=h5;Header 6=h6;Div=div;Address=address;Pre=pre;Code=code",
 		style_formats: [
 			{title: 'Paragraph', block: 'p'},
@@ -116,7 +116,7 @@ function cleanHTML(string){
 function triggerReloadModal(editor, $links, $elem, isCtrl) {
 	editor.windowManager.open({
 		title:"Close the editor?",
-		file:domainProtocol + "://" + domain + "/tinymce/close",
+		file:schoolProtocol + "://" + schoolDomain + "/tinymce/close",
 		width:600,
 		height:60,
 		buttons:[{

@@ -1,11 +1,11 @@
 var appVersion = '1.00';
 
 var store = window.localStorage;
-//var domain = 'edu-20.com:3000';
+var domain = 'edu-20.com:3000';
 //var domain = 'www.matrixlms.com';
-var domain = 'www.neolms.com';
-//var domainProtocol = 'http';
-var domainProtocol = 'https';
+//var domain = 'www.neolms.com';
+var domainProtocol = 'http';
+//var domainProtocol = 'https';
 var loginUrl = domainProtocol + '://' + domain + '/app/launch?version=' + appVersion + '&mobile_app=true&left_nav=true&new_left_nav=true&redirected=true';
 var isFirst = true;
 var wasOffline = false;
@@ -13,8 +13,8 @@ var isPageLoaded = false;
 var pageReloadCount = 0;
 var maxRetriesReached = false;
 var fowardLink = '';
-var schoolDomain = '';
-var schoolProtocol = 'http';
+var schoolDomain = domain;
+var schoolProtocol = domainProtocol;
 var loggedIn = false;
 var fileToUpload = '';
 var pushToken = '';
