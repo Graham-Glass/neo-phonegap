@@ -61,6 +61,7 @@
     <access origin="*" />
     <content src="index.html" />
 	<gap:platform name="android" />
+	<gap:plugin name="org.li8.inappbrowser" version="0.1" />
 	<gap:config-file platform="android" parent="/manifest">
      <application android:debuggable="false" />
 	</gap:config-file>
