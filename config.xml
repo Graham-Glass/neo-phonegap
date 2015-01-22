@@ -62,8 +62,16 @@
     <content src="index.html" />
 	<gap:platform name="android" />
 	<gap:plugin name="org.li8.inappbrowser" version="0.1" />
-	<gap:plugin name="org.apache.cordova.file" version="1.0.1" />
-	<gap:plugin name="com.chanthu.evri.gcs-file-transfer" version="1.0.0" />
+	<feature name="http://api.phonegap.com/1.0/file" />
+	<feature name="File">
+		   <param name="android-package" value="org.apache.cordova.file.FileUtils" />
+	</feature>
+	<feature name="FileTransfer">
+		  <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
+	</feature>
+	<feature name="Storage">
+		   <param value="org.apache.cordova.Storage" name="android-package"/>
+	</feature>
 	<gap:config-file platform="android" parent="/manifest">
      <application android:debuggable="true" />
 	</gap:config-file>

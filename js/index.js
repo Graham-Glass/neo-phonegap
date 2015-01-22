@@ -586,9 +586,6 @@ var app = {
 
 					function fileSystemSuccess(fileSystem) {
 						var download_link = encodeURI(URL);
-						ext = download_link.substr(download_link.lastIndexOf('.') + 1); //Get extension of URL
-						ext = ext.split('?');
-						ext = ext[0];
 						
 						var directoryEntry = fileSystem.root; // to get root path of directory
 						directoryEntry.getDirectory(Folder_Name, {
@@ -598,7 +595,7 @@ var app = {
 						var rootdir = fileSystem.root;
 						var fp = rootdir.fullPath; // Returns Fulpath of local directory
 
-						fp = fp + "/" + Folder_Name + "/" + File_Name + "." + ext; // fullpath and name of the file which we want to give
+						fp = fp + "/" + Folder_Name + "/" + File_Name; // fullpath and name of the file which we want to give
 						// download function call
 						filetransfer(download_link, fp);
 					}
