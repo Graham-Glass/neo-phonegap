@@ -576,30 +576,60 @@ var app = {
                 break;
             case 'downloadFile':
                 if (typeof data.content != 'undefined') {
-					 var url = data.content;
-					 var fileName = data.content.split('/');
-					 fileName = fileName[fileName.length-1].split('?');
-					 var filePath = '/sdcard/Downloads/'+fileName[0];
-					 var fileTransfer = new FileTransfer();
-					 var uri = encodeURI(url);
+					var URL = schoolProtocol + '://' + schoolDomain + data.content;
+					var Folder_Name = 'Downloads';
+					var File_Name = data.content.split('/');
+					File_Name = File_Name[File_Name.length-1].split('?');
+					File_Name = File_Name[0];
+					
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, fileSystemSuccess, fileSystemFail);
 
-					 fileTransfer.download(
-						 uri,
-						 filePath,
-						 function(entry) {
-							 console.log("download complete: " + entry.fullPath);
-						 },
-						 function(error) {
-							 console.log("download error source " + error.source);
-							 console.log("download error target " + error.target);
-							 console.log("upload error code" + error.code);
-						 },
-						 false, {
-							 headers: {
-								 "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
-							 }
-						 }
-					 );
+					function fileSystemSuccess(fileSystem) {
+						var download_link = encodeURI(URL);
+						
+						var directoryEntry = fileSystem.root; // to get root path of directory
+						directoryEntry.getDirectory(Folder_Name, {
+							create: true,
+							exclusive: false
+						}, onDirectorySuccess, onDirectoryFail); // creating folder in sdcard
+						var rootdir = fileSystem.root;
+						var fp = rootdir.toURL(); // Returns Fulpath of local directory
+
+						fp = fp + "/" + Folder_Name + "/" + File_Name; // fullpath and name of the file which we want to give
+						// download function call
+						filetransfer(download_link, fp);
+					}
+
+					function onDirectorySuccess(parent) {
+						console.log('directory created successfully');
+						// Directory created successfuly
+					}
+
+					function onDirectoryFail(error) {
+						//Error while creating directory
+						console.log("Unable to create new directory: " + error.code);
+					}
+
+					function fileSystemFail(evt) {
+						//Unable to access file system
+						console.log(evt.target.error.code);
+					}
+
+					function filetransfer(download_link, fp) {
+						var fileTransfer = new FileTransfer();
+						// File download function with URL and local path
+						fileTransfer.download(download_link, fp,
+							function(entry) {
+								console.log("download complete: " + entry.toURL());
+							},
+							function(error) {
+								//Download abort errors or download failed errors
+								console.log("download error source " + error.source);
+								console.log("download error target " + error.target);
+								console.log("upload error code" + error.code);
+							}
+						);
+					}
                 }
                 break;
             default:
