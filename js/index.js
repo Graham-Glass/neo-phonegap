@@ -589,9 +589,10 @@ var app = {
 									var fileTransfer = new FileTransfer();
 									fileEntry.remove();
 									localFilenameArr = data.content.split('/');
+									localFilenameArr = localFilenameArr[localFilenameArr.length-1].split('?');
 									fileTransfer.download(
 										schoolProtocol + '://' + schoolDomain + data.content,
-										sPath + localFilenameArr[localFilenameArr.length-1],
+										sPath + localFilenameArr[0],
 										function(theFile) {
 											console.log("download complete: " + theFile.toURI());
 											//showLink(theFile.toURI());
