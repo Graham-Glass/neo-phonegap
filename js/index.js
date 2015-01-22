@@ -581,6 +581,8 @@ var app = {
             	break;
             case 'downloadFile':
                 if (typeof data.content != 'undefined') {
+					app.updateStatusMessage('Downloading file...');
+					app.toggleLoader(true);
 					var URL = schoolProtocol + '://' + schoolDomain + data.content;
 					var Folder_Name = 'Download';
 					var File_Name = data.content.split('/');
@@ -625,7 +627,9 @@ var app = {
 						// File download function with URL and local path
 						fileTransfer.download(download_link, fp,
 							function(entry) {
-								alert('The file '+File_Name+' was successfully downloaded, you can access it in your downloads folder.');
+								alert('The file was successfully downloaded, you can access it in '+fp+'.');
+								app.updateStatusMessage('');
+								app.toggleLoader(false);
 								console.log("download complete: " + entry.fullPath);
 							},
 							function(error) {
