@@ -422,7 +422,6 @@ var app = {
                     if (data.href.substring(0, 1) == '/') {
                         data.href = schoolProtocol + '://' + schoolDomain + data.href;
                     }
-                    alert('window.open: ' + data.href);
                     window.open(data.href, '_blank', 'location=yes');
                 }
                 break;
