@@ -604,17 +604,18 @@ var app = {
 					}
 
 					function onDirectorySuccess(parent) {
+						console.log('directory created successfully');
 						// Directory created successfuly
 					}
 
 					function onDirectoryFail(error) {
 						//Error while creating directory
-						alert("Unable to create new directory: " + error.code);
+						console.log("Unable to create new directory: " + error.code);
 					}
 
 					function fileSystemFail(evt) {
 						//Unable to access file system
-						alert(evt.target.error.code);
+						console.log(evt.target.error.code);
 					}
 
 					function filetransfer(download_link, fp) {
@@ -622,13 +623,13 @@ var app = {
 						// File download function with URL and local path
 						fileTransfer.download(download_link, fp,
 							function(entry) {
-								alert("download complete: " + entry.fullPath);
+								console.log("download complete: " + entry.fullPath);
 							},
 							function(error) {
 								//Download abort errors or download failed errors
-								alert("download error source " + error.source);
-								//alert("download error target " + error.target);
-								//alert("upload error code" + error.code);
+								console.log("download error source " + error.source);
+								console.log("download error target " + error.target);
+								console.log("upload error code" + error.code);
 							}
 						);
 					}
