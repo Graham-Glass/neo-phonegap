@@ -627,7 +627,7 @@ var app = {
 						// File download function with URL and local path
 						fileTransfer.download(download_link, fp,
 							function(entry) {
-								alert('The file was successfully downloaded, you can access it in '+fp+'.');
+								alert('The file was successfully downloaded, you can access it in /' + Folder_Name + '/' + File_Name+'.');
 								app.updateStatusMessage('');
 								app.toggleLoader(false);
 								console.log("download complete: " + entry.fullPath);
