@@ -574,10 +574,15 @@ var app = {
                     $('body').css('height', body_height);
                 }
                 break;
+            case 'updateStatusMessage':
+            	if (typeof data.content != 'undefined') {
+            		app.updateStatusMessage(data.content);
+            	}
+            	break;
             case 'downloadFile':
                 if (typeof data.content != 'undefined') {
 					var URL = schoolProtocol + '://' + schoolDomain + data.content;
-					var Folder_Name = 'Downloads';
+					var Folder_Name = 'Download';
 					var File_Name = data.content.split('/');
 					File_Name = File_Name[File_Name.length-1].split('?');
 					File_Name = File_Name[0];
@@ -620,7 +625,8 @@ var app = {
 						// File download function with URL and local path
 						fileTransfer.download(download_link, fp,
 							function(entry) {
-								console.log("download complete: " + entry.toURL());
+								alert('The file '+File_Name+' was successfully downloaded, you can access it in your downloads folder.');
+								console.log("download complete: " + entry.fullPath);
 							},
 							function(error) {
 								//Download abort errors or download failed errors
