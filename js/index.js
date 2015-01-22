@@ -576,37 +576,62 @@ var app = {
                 break;
             case 'downloadFile':
                 if (typeof data.content != 'undefined') {
-					window.requestFileSystem(
-						LocalFileSystem.PERSISTENT, 0,
-						function onFileSystemSuccess(fileSystem) {
-							fileSystem.root.getFile(
-								"dummy.html", {
-									create: true,
-									exclusive: false
-								},
-								function gotFileEntry(fileEntry) {
-									var sPath = fileEntry.fullPath.replace("dummy.html", "");
-									var fileTransfer = new FileTransfer();
-									fileEntry.remove();
-									localFilenameArr = data.content.split('/');
-									localFilenameArr = localFilenameArr[localFilenameArr.length-1].split('?');
-									fileTransfer.download(
-										schoolProtocol + '://' + schoolDomain + data.content,
-										sPath + localFilenameArr[0],
-										function(theFile) {
-											console.log("download complete: " + theFile.toURI());
-											//showLink(theFile.toURI());
-										},
-										function(error) {
-											console.log("download error source " + error.source);
-											console.log("download error target " + error.target);
-											console.log("upload error code: " + error.code);
-										}
-									);
-								},
-								app.fail);
-						},
-						app.fail);
+					var URL = schoolProtocol + '://' + schoolDomain + data.content;
+					var Folder_Name = 'Downloads';
+					var File_Name = data.content.split('/');
+					File_Name = File_Name[File_Name.length-1].split('?');
+					File_Name = File_Name[0];
+					
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, fileSystemSuccess, fileSystemFail);
+
+					function fileSystemSuccess(fileSystem) {
+						var download_link = encodeURI(URL);
+						ext = download_link.substr(download_link.lastIndexOf('.') + 1); //Get extension of URL
+						ext = ext.split('?');
+						ext = ext[0];
+						
+						var directoryEntry = fileSystem.root; // to get root path of directory
+						directoryEntry.getDirectory(Folder_Name, {
+							create: true,
+							exclusive: false
+						}, onDirectorySuccess, onDirectoryFail); // creating folder in sdcard
+						var rootdir = fileSystem.root;
+						var fp = rootdir.fullPath; // Returns Fulpath of local directory
+
+						fp = fp + "/" + Folder_Name + "/" + File_Name + "." + ext; // fullpath and name of the file which we want to give
+						// download function call
+						filetransfer(download_link, fp);
+					}
+
+					function onDirectorySuccess(parent) {
+						// Directory created successfuly
+					}
+
+					function onDirectoryFail(error) {
+						//Error while creating directory
+						alert("Unable to create new directory: " + error.code);
+					}
+
+					function fileSystemFail(evt) {
+						//Unable to access file system
+						alert(evt.target.error.code);
+					}
+
+					function filetransfer(download_link, fp) {
+						var fileTransfer = new FileTransfer();
+						// File download function with URL and local path
+						fileTransfer.download(download_link, fp,
+							function(entry) {
+								alert("download complete: " + entry.fullPath);
+							},
+							function(error) {
+								//Download abort errors or download failed errors
+								alert("download error source " + error.source);
+								//alert("download error target " + error.target);
+								//alert("upload error code" + error.code);
+							}
+						);
+					}
                 }
                 break;
             default:
