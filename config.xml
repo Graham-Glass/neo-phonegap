@@ -65,6 +65,6 @@
 	<gap:plugin name="org.apache.cordova.file" version="1.0.1" />
 	<gap:plugin name="com.chanthu.evri.gcs-file-transfer" version="1.0.0" />
 	<gap:config-file platform="android" parent="/manifest">
-     <application android:debuggable="false" />
+     <application android:debuggable="true" />
 	</gap:config-file>
 </widget>
