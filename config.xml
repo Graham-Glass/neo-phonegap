@@ -64,7 +64,7 @@
 	<gap:plugin name="org.li8.inappbrowser" version="0.1" />
 	<gap:plugin name="org.apache.cordova.file" version="1.0.1" />
 	<gap:plugin name="com.chanthu.evri.gcs-file-transfer" version="1.0.0" />
-	<gap:plugin name="com.adobe.plugins.pushplugin" />
+	<gap:plugin name="com.phonegap.plugins.pushplugin" version="2.4.0" />
 	<gap:config-file platform="android" parent="/manifest">
      <application android:debuggable="true" />
 	</gap:config-file>
