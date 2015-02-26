@@ -351,17 +351,24 @@ var app = {
 
                     try {
                         var pushNotification = window.plugins.pushNotification;
-
+						if(navigator.userAgent.match(/Android/i)){
+							var options = {
+								"senderID":"186349774297",
+								"ecb":"app.onAndroidNotification"
+							}
+						}else{
+							var options = {
+								alert: true,
+								badge: true,
+								sound: true
+                        	}
+						}
                         pushNotification.register(function(deviceToken) {
                             app.storeToken(deviceToken);
                             console.log(JSON.stringify(['registerDevice', deviceToken]));
                         }, function(status) {
                             console.log('Error registering for push notifications: ' + status);
-                        }, {
-                            alert: true,
-                            badge: true,
-                            sound: true
-                        });
+                        }, options);
                     } catch (err) {
                         console.log("Error: " + err.message);
                     }
@@ -793,9 +800,11 @@ var app = {
         $('#contentFrame').attr('src', schoolProtocol + '://' + schoolDomain + '/');
     },
     storeToken: function(receivedToken) {
-        pushToken = receivedToken;
-        //$.get('http://'+domain+'/app/test_notification', {token: receivedToken});
-        //console.log("Saved token: "+receivedToken);
+    	if(navigator.userAgent.match(/Android/i)){
+    		document.getElementById('contentFrame').contentWindow.postMessage("{\"androidToken\": \""+receivedToken+"\"}", "*");
+    	}else{
+    		document.getElementById('contentFrame').contentWindow.postMessage("{\"iosToken\": \""+receivedToken+"\"}", "*");
+    	}
     },
     fail: function(evt) {
         //console.log("Error: " + evt.target.error.code);
@@ -864,6 +873,9 @@ var app = {
     goHome: function() {
         app.toggleLoader(true);
         $('#contentFrame').attr('src', schoolProtocol + '://' + schoolDomain + '/');
+    },
+    onAndroidNotification: function(e) {
+    	//do nothing for now
     }
 };
 
