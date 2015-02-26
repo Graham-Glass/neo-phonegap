@@ -364,7 +364,9 @@ var app = {
                         	}
 						}
                         pushNotification.register(function(deviceToken) {
-                            app.storeToken(deviceToken);
+                        	if (!navigator.userAgent.match(/Android/i)) {
+                            	app.storeToken(deviceToken);
+                            }
                             console.log(JSON.stringify(['registerDevice', deviceToken]));
                         }, function(status) {
                             console.log('Error registering for push notifications: ' + status);
@@ -875,7 +877,22 @@ var app = {
         $('#contentFrame').attr('src', schoolProtocol + '://' + schoolDomain + '/');
     },
     onAndroidNotification: function(e) {
-    	//do nothing for now
+    	switch(e.event){ 
+    		case 'registered': 
+    			if (e.regid.length > 0){ 
+    				app.storeToken(e.regid);
+    			} 
+    			break;   
+    		case 'message': 
+    			console.log('Android message: ' + e.msg); 
+    			break;   
+    		case 'error': 
+    			console.log('Error: ' + e.msg); 
+    			break;   
+    		default: 
+    			console.log('An unknown event was received'); 
+    			break; 
+    	}
     }
 };
 
