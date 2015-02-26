@@ -46,6 +46,8 @@ var app = {
         document.addEventListener('pause', this.onPause, false);
         document.addEventListener('deviceready', this.onAppLaunch, false);
         document.addEventListener('deviceready', this.onDeviceReady, false);
+
+        app.checkConnection();
     },
 
     onDeviceReady: function() {
@@ -53,11 +55,6 @@ var app = {
         if (appVersion) {
             document.getElementById("versionBlock").innerHTML = "V" + appVersion;
         }
-        /*var pushNotification = window.plugins.pushNotification;
-         pushNotification.registerDevice({alert:true, badge:true, sound:true}, function(status) {
-         console.log(JSON.stringify(['registerDevice status: ', status]));
-         app.storeToken(status.deviceToken);
-         });*/
 
         app.checkReachable();
 
@@ -135,11 +132,33 @@ var app = {
          contentFrame.contentWindow.location = loginUrl;
          }*/
     },
+    checkConnection: function() {
+        var networkState = navigator.connection.type;
+
+        var states = {};
+        states[Connection.UNKNOWN] = 'Unknown connection';
+        states[Connection.ETHERNET] = 'Ethernet connection';
+        states[Connection.WIFI] = 'WiFi connection';
+        states[Connection.CELL_2G] = 'Cell 2G connection';
+        states[Connection.CELL_3G] = 'Cell 3G connection';
+        states[Connection.CELL_4G] = 'Cell 4G connection';
+        states[Connection.NONE] = 'No network connection';
+
+        if (networkState == Connection.UNKNOWN || networkState == Connection.NONE) {
+
+            app.updateStatusMessage('Error Loading: ' + states[networkState]);
+            return false;
+        }
+
+        return true;
+    },
     checkReachable: function() {
         //store.clear();
+        console.log("check reachable");
         $.ajax(domainProtocol + '://' + domain, {
             statusCode: {
                 404: function() {
+                    console.log("not reachable blank");
                     $('#contentFrame').attr('src', 'no_internet.html');
                 },
                 200: function() {
@@ -151,6 +170,7 @@ var app = {
                             statusCode: {
                                 404: app.errorEvent,
                                 200: function() {
+                                    console.log("loading " + currentSchool);
                                     $('#contentFrame').attr('src', currentSchool);
                                     app.toggleLoader(false);
                                 }
@@ -159,6 +179,7 @@ var app = {
                             error: app.errorEvent
                         });
                     } else {
+                        console.log("loading " + loginUrl);
                         $('#contentFrame').attr('src', loginUrl);
                     }
                 }
@@ -192,11 +213,14 @@ var app = {
         app.updateStatusMessage('');
         isPageLoaded = false;
 
-        app.toggleLoader(true);
+        if (app.checkConnection()) {
+            //connectionTimeout = setTimeout(app.checkTimeout,connectionTimeoutSeconds*1000);
+            app.toggleLoader(true);
 
-        if (isFirst) {
-            app.updateStatusMessage('Loading...');
-            isFirst = false;
+            if (isFirst) {
+                app.updateStatusMessage('Loading...');
+                isFirst = false;
+            }
         }
     },
     loadPrevious: function() {
@@ -270,11 +294,9 @@ var app = {
                 if (data.action == 'login') {
                     //console.log('Logging in');
                     loggedIn = true;
-
                     if (!navigator.userAgent.match(/Android/i)) {
                         $('header').show();
                     }
-
                     var contentFrame = document.getElementById('contentFrame');
 
                     if (!wentBack && !wentForward) {
@@ -325,6 +347,23 @@ var app = {
                         app.enableRightArrow();
                     } else {
                         app.disableRightArrow();
+                    }
+
+                    try {
+                        var pushNotification = window.plugins.pushNotification;
+
+                        pushNotification.register(function(deviceToken) {
+                            app.storeToken(deviceToken);
+                            console.log(JSON.stringify(['registerDevice', deviceToken]));
+                        }, function(status) {
+                            console.log('Error registering for push notifications: ' + status);
+                        }, {
+                            alert: true,
+                            badge: true,
+                            sound: true
+                        });
+                    } catch (err) {
+                        console.log("Error: " + err.message);
                     }
                 }
                 break;
@@ -445,7 +484,7 @@ var app = {
                     if (typeof data.content != 'undefined') {
                         $('#courseToolbar').html(data.content);
                         $('#courseToolbar').css({
-                            top: parseFloat(window.device.version) >= 7.0 ? 60 : 40,
+                            top: 40,
                             width: $(window).width() - 234,
                         });
                         $('#courseToolbar').show();
@@ -574,71 +613,71 @@ var app = {
                 }
                 break;
             case 'updateStatusMessage':
-            	if (typeof data.content != 'undefined') {
-            		app.updateStatusMessage(data.content);
-            	}
-            	break;
+                if (typeof data.content != 'undefined') {
+                    app.updateStatusMessage(data.content);
+                }
+                break;
             case 'downloadFile':
                 if (typeof data.content != 'undefined') {
-					app.updateStatusMessage('Downloading file...');
-					app.toggleLoader(true);
-					var URL = schoolProtocol + '://' + schoolDomain + data.content;
-					var Folder_Name = 'Download';
-					var File_Name = data.content.split('/');
-					File_Name = File_Name[File_Name.length-1].split('?');
-					File_Name = File_Name[0];
-					
-					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, fileSystemSuccess, fileSystemFail);
+                    app.updateStatusMessage('Downloading file...');
+                    app.toggleLoader(true);
+                    var URL = schoolProtocol + '://' + schoolDomain + data.content;
+                    var Folder_Name = 'Download';
+                    var File_Name = data.content.split('/');
+                    File_Name = File_Name[File_Name.length - 1].split('?');
+                    File_Name = File_Name[0];
 
-					function fileSystemSuccess(fileSystem) {
-						var download_link = encodeURI(URL);
-						
-						var directoryEntry = fileSystem.root; // to get root path of directory
-						directoryEntry.getDirectory(Folder_Name, {
-							create: true,
-							exclusive: false
-						}, onDirectorySuccess, onDirectoryFail); // creating folder in sdcard
-						var rootdir = fileSystem.root;
-						var fp = rootdir.toURL(); // Returns Fulpath of local directory
+                    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, fileSystemSuccess, fileSystemFail);
 
-						fp = fp + "/" + Folder_Name + "/" + File_Name; // fullpath and name of the file which we want to give
-						// download function call
-						filetransfer(download_link, fp);
-					}
+                    function fileSystemSuccess(fileSystem) {
+                        var download_link = encodeURI(URL);
 
-					function onDirectorySuccess(parent) {
-						console.log('directory created successfully');
-						// Directory created successfuly
-					}
+                        var directoryEntry = fileSystem.root; // to get root path of directory
+                        directoryEntry.getDirectory(Folder_Name, {
+                            create: true,
+                            exclusive: false
+                        }, onDirectorySuccess, onDirectoryFail); // creating folder in sdcard
+                        var rootdir = fileSystem.root;
+                        var fp = rootdir.toURL(); // Returns Fulpath of local directory
 
-					function onDirectoryFail(error) {
-						//Error while creating directory
-						console.log("Unable to create new directory: " + error.code);
-					}
+                        fp = fp + "/" + Folder_Name + "/" + File_Name; // fullpath and name of the file which we want to give
+                        // download function call
+                        filetransfer(download_link, fp);
+                    }
 
-					function fileSystemFail(evt) {
-						//Unable to access file system
-						console.log(evt.target.error.code);
-					}
+                    function onDirectorySuccess(parent) {
+                        console.log('directory created successfully');
+                        // Directory created successfuly
+                    }
 
-					function filetransfer(download_link, fp) {
-						var fileTransfer = new FileTransfer();
-						// File download function with URL and local path
-						fileTransfer.download(download_link, fp,
-							function(entry) {
-								alert('The file was successfully downloaded, you can access it in /' + Folder_Name + '/' + File_Name+'.');
-								app.updateStatusMessage('');
-								app.toggleLoader(false);
-								console.log("download complete: " + entry.fullPath);
-							},
-							function(error) {
-								//Download abort errors or download failed errors
-								console.log("download error source " + error.source);
-								console.log("download error target " + error.target);
-								console.log("upload error code" + error.code);
-							}
-						);
-					}
+                    function onDirectoryFail(error) {
+                        //Error while creating directory
+                        console.log("Unable to create new directory: " + error.code);
+                    }
+
+                    function fileSystemFail(evt) {
+                        //Unable to access file system
+                        console.log(evt.target.error.code);
+                    }
+
+                    function filetransfer(download_link, fp) {
+                        var fileTransfer = new FileTransfer();
+                        // File download function with URL and local path
+                        fileTransfer.download(download_link, fp,
+                            function(entry) {
+                                alert('The file was successfully downloaded, you can access it in /' + Folder_Name + '/' + File_Name + '.');
+                                app.updateStatusMessage('');
+                                app.toggleLoader(false);
+                                console.log("download complete: " + entry.fullPath);
+                            },
+                            function(error) {
+                                //Download abort errors or download failed errors
+                                console.log("download error source " + error.source);
+                                console.log("download error target " + error.target);
+                                console.log("upload error code" + error.code);
+                            }
+                        );
+                    }
                 }
                 break;
             default:
@@ -1081,7 +1120,7 @@ $(document).ready(function() {
         if (($(window).height() == originalWidth && $(window).width() == originalHeight) || navigator.userAgent.match(/Android/i)) {
             $('body, #contentFrame, #loadingOverlay').css({
                 width: $(window).width(),
-                height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 20)
+                height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 0)
             });
             $('header').css('width', $(window).width());
             originalHeight = $(window).height();
@@ -1101,7 +1140,7 @@ $(document).ready(function() {
 
     $('body, #contentFrame, #loadingOverlay').css({
         width: $(window).width(),
-        height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 20)
+        height: $(window).height() - (navigator.userAgent.match(/Android/i) ? 10 : 0)
     });
     $('header').css('width', $(window).width());
 
