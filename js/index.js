@@ -880,8 +880,7 @@ var app = {
     	switch(e.event){ 
     		case 'registered': 
     			if (e.regid.length > 0){ 
-    				console.log('Reg ID: ' + e.regid); 
-    				console.log('Message: ' + e.msg); 
+    				console.log('Reg ID: ' + e.regid);
     				app.storeToken(e.regid);
     			} 
     			break;   
