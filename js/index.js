@@ -171,7 +171,12 @@ var app = {
                                 404: app.errorEvent,
                                 200: function() {
                                     console.log("loading " + currentSchool);
-                                    $('#contentFrame').attr('src', currentSchool);
+                                    var authToken = store.getItem('authToken');
+                                    if (authToken) {
+                                        $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?auth_token=' + authToken + '&mobile_app=true'));
+                                    } else {
+                                        $('#contentFrame').attr('src', currentSchool);
+                                    }
                                     app.toggleLoader(false);
                                 }
                             },
@@ -348,32 +353,6 @@ var app = {
                     } else {
                         app.disableRightArrow();
                     }
-
-                    try {
-                        var pushNotification = window.plugins.pushNotification;
-						if(navigator.userAgent.match(/Android/i)){
-							var options = {
-								"senderID":"186349774297",
-								"ecb":"app.onAndroidNotification"
-							}
-						}else{
-							var options = {
-								alert: true,
-								badge: true,
-								sound: true
-                        	}
-						}
-                        pushNotification.register(function(deviceToken) {
-                        	if (!navigator.userAgent.match(/Android/i)) {
-                            	app.storeToken(deviceToken);
-                            }
-                            console.log(JSON.stringify(['registerDevice', deviceToken]));
-                        }, function(status) {
-                            console.log('Error registering for push notifications: ' + status);
-                        }, options);
-                    } catch (err) {
-                        console.log("Error: " + err.message);
-                    }
                 }
                 break;
             case 'logOut':
@@ -387,6 +366,7 @@ var app = {
                     pageHistory = [];
                     pageHistoryMarker = -1;
                     app.hideLeftNav();
+                    store.removeItem('authToken');
                 }
                 break;
             case 'setSchoolDomain':
@@ -689,6 +669,16 @@ var app = {
                     }
                 }
                 break;
+            case 'registerNotifications':
+                if (data.content == '1') {
+                    app.registerNotifications();
+                }
+                break;
+            case 'authToken':
+                if (typeof data.content != 'undefined') {
+                    store.setItem('authToken', data.content);
+                }
+                break;
             default:
                 return;
                 break;
@@ -802,11 +792,11 @@ var app = {
         $('#contentFrame').attr('src', schoolProtocol + '://' + schoolDomain + '/');
     },
     storeToken: function(receivedToken) {
-    	if(navigator.userAgent.match(/Android/i)){
-    		document.getElementById('contentFrame').contentWindow.postMessage("{\"androidToken\": \""+receivedToken+"\"}", "*");
-    	}else{
-    		document.getElementById('contentFrame').contentWindow.postMessage("{\"iosToken\": \""+receivedToken+"\"}", "*");
-    	}
+        if (navigator.userAgent.match(/Android/i)) {
+            document.getElementById('contentFrame').contentWindow.postMessage("{\"androidToken\": \"" + receivedToken + "\"}", "*");
+        } else {
+            document.getElementById('contentFrame').contentWindow.postMessage("{\"iosToken\": \"" + receivedToken + "\"}", "*");
+        }
     },
     fail: function(evt) {
         //console.log("Error: " + evt.target.error.code);
@@ -876,24 +866,56 @@ var app = {
         app.toggleLoader(true);
         $('#contentFrame').attr('src', schoolProtocol + '://' + schoolDomain + '/');
     },
+    registerNotifications: function() {
+        var pushToken = store.getItem('pushToken');
+        if (pushToken) {
+            app.storeToken(pushToken);
+        } else {
+            try {
+                var pushNotification = window.plugins.pushNotification;
+                if (navigator.userAgent.match(/Android/i)) {
+                    var options = {
+                        "senderID": "186349774297",
+                        "ecb": "app.onAndroidNotification"
+                    }
+                } else {
+                    var options = {
+                        alert: true,
+                        badge: true,
+                        sound: true
+                    }
+                }
+                pushNotification.register(function(deviceToken) {
+                    if (!navigator.userAgent.match(/Android/i)) {
+                        app.storeToken(deviceToken);
+                    }
+                    console.log(JSON.stringify(['registerDevice', deviceToken]));
+                }, function(status) {
+                    console.log('Error registering for push notifications: ' + status);
+                }, options);
+            } catch (err) {
+                console.log("Error: " + err.message);
+            }
+        }
+    },
     onAndroidNotification: function(e) {
-    	switch(e.event){ 
-    		case 'registered': 
-    			if (e.regid.length > 0){ 
-    				console.log('Reg ID: ' + e.regid);
-    				app.storeToken(e.regid);
-    			} 
-    			break;   
-    		case 'message': 
-    			console.log('Android message: ' + e.msg); 
-    			break;   
-    		case 'error': 
-    			console.log('Error: ' + e.msg); 
-    			break;   
-    		default: 
-    			console.log('An unknown event was received'); 
-    			break; 
-    	}
+        switch (e.event) {
+            case 'registered':
+                if (e.regid.length > 0) {
+                    console.log('Reg ID: ' + e.regid);
+                    app.storeToken(e.regid);
+                }
+                break;
+            case 'message':
+                console.log('Android message: ' + e.msg);
+                break;
+            case 'error':
+                console.log('Error: ' + e.msg);
+                break;
+            default:
+                console.log('An unknown event was received');
+                break;
+        }
     }
 };
 
