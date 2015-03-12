@@ -171,9 +171,10 @@ var app = {
                                 404: app.errorEvent,
                                 200: function() {
                                     console.log("loading " + currentSchool);
-                                    var authToken = store.getItem('authToken');
-                                    if (authToken) {
-                                        $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?auth_token=' + authToken + '&mobile_app=true'));
+                                    var loginUsername = store.getItem('loginUsername');
+                                    var loginPassword = store.getItem('loginPassword');
+                                    if (loginUsername && loginPassword) {
+                                        $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginUsername + '&password=' + loginPassword + '&mobile_app=true'));
                                     } else {
                                         $('#contentFrame').attr('src', currentSchool);
                                     }
@@ -353,6 +354,12 @@ var app = {
                     } else {
                         app.disableRightArrow();
                     }
+                    var loginUsernameTemp = store.getItem('loginUsernameTemp');
+                    var loginPasswordTemp = store.getItem('loginPasswordTemp');
+                    if(loginUsernameTemp && loginPasswordTemp){
+                    	store.setItem('loginUsername', loginUsernameTemp);
+                    	store.setItem('loginPassword', loginPasswordTemp);
+                    }
                 }
                 break;
             case 'logOut':
@@ -366,7 +373,8 @@ var app = {
                     pageHistory = [];
                     pageHistoryMarker = -1;
                     app.hideLeftNav();
-                    store.removeItem('authToken');
+                    store.removeItem('loginUsername');
+                    store.removeItem('loginPassword');
                 }
                 break;
             case 'setSchoolDomain':
@@ -674,9 +682,10 @@ var app = {
                     app.registerNotifications();
                 }
                 break;
-            case 'authToken':
-                if (typeof data.content != 'undefined') {
-                    store.setItem('authToken', data.content);
+            case 'loginCredentials':
+                if (typeof data.userid != 'undefined') {
+                    store.setItem('loginUsernameTemp', data.userid);
+                    store.setItem('loginPasswordTemp', data.password);
                 }
                 break;
             default:
