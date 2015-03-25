@@ -875,6 +875,7 @@ var app = {
                 }
                 pushNotification.register(function(deviceToken) {
                     if (!navigator.userAgent.match(/Android/i)) {
+                    	store.setItem('pushToken', deviceToken);
                         app.storeToken(deviceToken);
                     }
                     console.log(JSON.stringify(['registerDevice', deviceToken]));
@@ -891,6 +892,7 @@ var app = {
             case 'registered':
                 if (e.regid.length > 0) {
                     console.log('Reg ID: ' + e.regid);
+                    store.setItem('pushToken', e.regid);
                     app.storeToken(e.regid);
                 }
                 break;
