@@ -158,36 +158,13 @@ var app = {
         $.ajax(domainProtocol + '://' + domain, {
             statusCode: {
                 404: function() {
-                    console.log("not reachable blank");
+                    console.log("not reachable: " + domainProtocol + '://' + domain);
                     $('#contentFrame').attr('src', 'no_internet.html');
                 },
                 200: function() {
                     app.toggleLoader(true);
                     app.updateStatusMessage('Loading...');
-                    var currentSchool = store.getItem('currentSchool');
-                    if (currentSchool) {
-                        $.ajax(currentSchool, {
-                            statusCode: {
-                                404: app.errorEvent,
-                                200: function() {
-                                    console.log("loading " + currentSchool);
-                                    var loginUsername = store.getItem('loginUsername');
-                                    var loginPassword = store.getItem('loginPassword');
-                                    if (loginUsername && loginPassword) {
-                                        $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginUsername + '&password=' + loginPassword + '&mobile_app=true'));
-                                    } else {
-                                        $('#contentFrame').attr('src', currentSchool);
-                                    }
-                                    app.toggleLoader(false);
-                                }
-                            },
-                            timeout: 5000,
-                            error: app.errorEvent
-                        });
-                    } else {
-                        console.log("loading " + loginUrl);
-                        $('#contentFrame').attr('src', loginUrl);
-                    }
+                    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFSForSchoolRead, app.fail);
                 }
             }
         });
@@ -356,9 +333,8 @@ var app = {
                     }
                     var loginUsernameTemp = store.getItem('loginUsernameTemp');
                     var loginPasswordTemp = store.getItem('loginPasswordTemp');
-                    if(loginUsernameTemp && loginPasswordTemp){
-                    	store.setItem('loginUsername', loginUsernameTemp);
-                    	store.setItem('loginPassword', loginPasswordTemp);
+                    if (loginUsernameTemp && loginPasswordTemp) {
+                        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.storeLoginCredentials, app.fail);
                     }
                 }
                 break;
@@ -373,8 +349,7 @@ var app = {
                     pageHistory = [];
                     pageHistoryMarker = -1;
                     app.hideLeftNav();
-                    store.removeItem('loginUsername');
-                    store.removeItem('loginPassword');
+                    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.deleteLoginCredentials, app.fail);
                 }
                 break;
             case 'setSchoolDomain':
@@ -391,6 +366,7 @@ var app = {
                         });
                     }
                     store.setItem('currentSchool', schoolProtocol + '://' + schoolDomain + '/?mobile_app=true');
+                    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.storeCurrentSchool, app.fail);
                     //console.log('Selected school: '+schoolDomain);
                 }
                 break;
@@ -489,6 +465,7 @@ var app = {
                     if (typeof data.hide != 'undefined') {
                         $('#courseToolbar').hide();
                     }
+                    tabnav_adjustment('#courseToolbar');
                 }
                 break;
             case 'openExternal':
@@ -599,6 +576,7 @@ var app = {
             case 'clearStorage':
                 if (typeof data.action != 'undefined') {
                     store.clear();
+                    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.deleteCurrentSchool, app.fail);
                 }
                 break;
             case 'refreshBodyHeight':
@@ -891,7 +869,8 @@ var app = {
                     var options = {
                         alert: true,
                         badge: true,
-                        sound: true
+                        sound: true,
+                        ecb: "app.onIOSNotification"
                     }
                 }
                 pushNotification.register(function(deviceToken) {
@@ -925,6 +904,151 @@ var app = {
                 console.log('An unknown event was received');
                 break;
         }
+    },
+    onIOSNotification: function(e) {
+        console.log('onIOSNotification: ' + JSON.stringify(e));
+        if (e.alert) {
+            var item_id = /\(ID: ([0-9]*)\)$/.exec(e.alert);
+            var currentSchool = store.getItem('currentSchool');
+            console.log('is alert, item_id: ' + JSON.stringify(item_id));
+            if (e.alert.charAt(0) == 'M') {
+                console.log('opening ' + currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+                app.updateStatusMessage('Loading message...');
+                $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+            } else {
+                console.log('opening ' + currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+                app.updateStatusMessage('Loading notification...');
+                $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+            }
+        }
+    },
+    storeLoginCredentials: function(fileSystem) {
+        console.log('storeLoginCredentials');
+        fileSystem.root.getFile("login.txt", {
+            create: true,
+            exclusive: false
+        }, app.gotLoginFileEntry, app.fail);
+    },
+    gotLoginFileEntry: function(fileEntry) {
+        console.log('gotLoginFileEntry');
+        fileEntry.createWriter(app.gotLoginFileWriter, app.fail);
+    },
+    gotLoginFileWriter: function(writer) {
+        console.log('gotLoginFileWriter');
+        writer.write(store.getItem('loginUsernameTemp') + "\n" + store.getItem('loginPasswordTemp'));
+    },
+    storeCurrentSchool: function(fileSystem) {
+        console.log('storeCurrentSchool');
+        fileSystem.root.getFile("school.txt", {
+            create: true,
+            exclusive: false
+        }, app.gotSchoolFileEntry, app.fail);
+    },
+    gotSchoolFileEntry: function(fileEntry) {
+        console.log('gotSchoolFileEntry');
+        fileEntry.createWriter(app.gotSchoolFileWriter, app.fail);
+    },
+    gotSchoolFileWriter: function(writer) {
+        console.log('gotSchoolFileWriter');
+        writer.write(store.getItem('currentSchool'));
+    },
+    gotFSForLoginRead: function(fileSystem) {
+        console.log('gotFSForLoginRead');
+        fileSystem.root.getFile("login.txt", {
+            create: true,
+            exclusive: false
+        }, app.gotFileEntryForLoginRead, app.fail);
+    },
+    gotFileEntryForLoginRead: function(fileEntry) {
+        console.log('gotFileEntryForLoginRead');
+        fileEntry.file(app.gotFileForLoginRead, app.fail);
+    },
+    gotFileForLoginRead: function(file) {
+        var currentSchool = store.getItem('currentSchool');
+        console.log('gotFileForLoginRead');
+        var reader = new FileReader();
+        reader.onloadend = function(evt) {
+            console.log("Read as text");
+            var loginCredentials = evt.target.result;
+            console.log('loginCredentials: ' + loginCredentials);
+            if (loginCredentials.length) {
+                var loginCredentialsArray = loginCredentials.split("\n");
+                console.log('loginCredentials found, opening ' + currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true'));
+                $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true'));
+            } else {
+                $('#contentFrame').attr('src', currentSchool);
+            }
+            app.toggleLoader(false);
+        };
+        reader.readAsText(file);
+    },
+    deleteLoginCredentials: function(fileSystem) {
+        console.log('deleteLoginCredentials');
+        fileSystem.root.getFile("login.txt", {
+            create: true,
+            exclusive: false
+        }, app.gotDeleteLoginFileEntry, app.fail);
+    },
+    gotDeleteLoginFileEntry: function(fileEntry) {
+        console.log('gotDeleteLoginFileEntry');
+        fileEntry.createWriter(app.gotDeleteLoginFileWriter, app.fail);
+    },
+    gotDeleteLoginFileWriter: function(writer) {
+        console.log('gotDeleteLoginFileWriter');
+        writer.write("");
+    },
+    gotFSForSchoolRead: function(fileSystem) {
+        console.log('gotFSForSchoolRead');
+        fileSystem.root.getFile("school.txt", {
+            create: true,
+            exclusive: false
+        }, app.gotFileEntryForSchoolRead, app.fail);
+    },
+    gotFileEntryForSchoolRead: function(fileEntry) {
+        console.log('gotFileEntryForSchoolRead');
+        fileEntry.file(app.getCurrentSchool, app.fail);
+    },
+    getCurrentSchool: function(file) {
+        console.log('getCurrentSchool');
+        var reader = new FileReader();
+        reader.onloadend = function(evt) {
+            console.log("Read as text");
+            var currentSchool = evt.target.result;
+            console.log('currentSchool: ' + currentSchool);
+            if (currentSchool.length) {
+                $.ajax(currentSchool, {
+                    statusCode: {
+                        404: app.errorEvent,
+                        200: function() {
+                            store.setItem('currentSchool', currentSchool);
+                            window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFSForLoginRead, app.fail);
+                        }
+                    },
+                    timeout: 5000,
+                    error: app.errorEvent
+                });
+            } else {
+                console.log("loading " + loginUrl);
+                $('#contentFrame').attr('src', loginUrl);
+            }
+            app.toggleLoader(false);
+        };
+        reader.readAsText(file);
+    },
+    deleteCurrentSchool: function(fileSystem) {
+        console.log('deleteCurrentSchool');
+        fileSystem.root.getFile("school.txt", {
+            create: true,
+            exclusive: false
+        }, app.gotDeleteSchoolFileEntry, app.fail);
+    },
+    gotDeleteSchoolFileEntry: function(fileEntry) {
+        console.log('gotDeleteSchoolFileEntry');
+        fileEntry.createWriter(app.gotDeleteSchoolFileWriter, app.fail);
+    },
+    gotDeleteSchoolFileWriter: function(writer) {
+        console.log('gotDeleteSchoolFileWriter');
+        writer.write("");
     }
 };
 
@@ -987,7 +1111,7 @@ function get_args(url) {
 }
 
 function inputFocusedActions() {
-    //console.log('input focused');
+    console.log('input focused');
     if (!$('.searchHolder .dropDown').hasClass('dDownShow')) {
         $('header').css({
             'position': 'absolute',
@@ -1004,7 +1128,7 @@ function inputFocusedActions() {
 }
 
 function inputBlurredActions() {
-    //console.log('input blurred');
+    console.log('input blurred');
     $('header').css({
         'position': 'fixed',
         'top': 0,
@@ -1135,6 +1259,46 @@ function hc_go_to_topic(element) {
     app.refreshHeader();
 }
 
+function tabnav_adjustment(containerId) {
+    if ($(containerId + ' ul.tabnav').length) {
+        $(containerId + ' ul.tabnav').css('overflow', 'visible');
+        if ($(containerId + ' ul.tabnav li.tabs_more_link .dropDown a').length > 0) {
+            $(containerId + ' ul.tabnav li.tabs_more_link .dropDown a').wrap('<li></li>');
+            $(containerId + ' ul.tabnav li.tabs_more_link .dropDown li').insertBefore(containerId + ' ul.tabnav li.tabs_more_link');
+        }
+
+        if ($(window).width() < 980 || $(containerId + ' ul.tabnav a.selected').parents('.dropDown').length > 0) {
+            $(containerId + ' ul.tabnav a.selected').parent().prependTo(containerId + ' ul.tabnav');
+        }
+
+        $(containerId + ' ul.tabnav li:not(.tabs_more_link)').each(function() {
+            if ($(this).offset().top > $(containerId + ' ul.tabnav li:first-child').offset().top) {
+                $(this).appendTo(containerId + ' ul.tabnav .dropDown').find('a').unwrap();
+                $(containerId + ' ul.tabnav li.tabs_more_link').css('display', 'inline-block');
+            }
+        });
+
+        if ($(containerId + ' ul.tabnav li.tabs_more_link').length) {
+            var i = 0;
+            while (i < 5 && $(containerId + ' ul.tabnav li.tabs_more_link').offset().top > $(containerId + ' ul.tabnav li:first-child').offset().top) {
+                $(containerId + ' ul.tabnav li.tabs_more_link').prev().prependTo(containerId + ' ul.tabnav .dropDown').find('a').unwrap();
+                i++;
+            }
+        }
+
+        if ($(containerId + ' ul.tabnav li.tabs_more_link .dropDown a').length == 0) {
+            $(containerId + ' ul.tabnav li.tabs_more_link').css('display', 'none');
+        }
+
+        $(containerId + ' ul.tabnav .dropDownHolder > a').off('click').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).siblings('.dropDown').toggleClass('dDownShow');
+            $(this).toggleClass('highlight');
+        });
+    }
+}
+
 $(document).ready(function() {
     // Handles external messaging (API).
     window.addEventListener("message", function(event) {
@@ -1187,9 +1351,11 @@ $(document).ready(function() {
             originalHeight = $(window).height();
             originalWidth = $(window).width();
         } else if (!navigator.userAgent.match(/Android/i)) {
-            if ($(window).height() < originalHeight) {
+            if ($(window).height() < (originalHeight - 50)) {
+                console.log('window smaller');
                 inputFocusedActions();
             } else {
+                console.log('window larger');
                 inputBlurredActions();
             }
         }
