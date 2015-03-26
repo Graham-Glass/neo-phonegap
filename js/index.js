@@ -897,10 +897,21 @@ var app = {
                 }
                 break;
             case 'message':
-                console.log('Android message: ' + e.message);
+				var item_id = /\(ID: ([0-9]*)\)$/.exec(e.message);
+				var currentSchool = store.getItem('currentSchool');
+				console.log('is alert, item_id: ' + JSON.stringify(item_id));
+				if (e.message.charAt(0) == 'M') {
+					console.log('opening ' + currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+					app.updateStatusMessage('Loading message...');
+					$('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+				} else {
+					console.log('opening ' + currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+					app.updateStatusMessage('Loading notification...');
+					$('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+				}
                 break;
             case 'error':
-                console.log('Error: ' + e.msg);
+                console.log('Error: ' + e.message);
                 break;
             default:
                 console.log('An unknown event was received');
