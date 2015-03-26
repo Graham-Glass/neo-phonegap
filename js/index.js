@@ -888,6 +888,7 @@ var app = {
         }
     },
     onAndroidNotification: function(e) {
+    	console.log('GCM event');
         switch (e.event) {
             case 'registered':
                 if (e.regid.length > 0) {
