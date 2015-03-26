@@ -34,6 +34,7 @@ var canGoForward = false;
 var wentBack = false;
 var wentForward = false;
 var API = {};
+var androidSenderID = "1061568968505";
 var originalHeight = $(window).height();
 var originalWidth = $(window).width();
 var loadingOverlayTimeoutAmount = 2000;

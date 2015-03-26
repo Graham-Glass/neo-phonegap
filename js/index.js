@@ -862,7 +862,7 @@ var app = {
                 var pushNotification = window.plugins.pushNotification;
                 if (navigator.userAgent.match(/Android/i)) {
                     var options = {
-                        "senderID": "186349774297",
+                        "senderID": androidSenderID,
                         "ecb": "app.onAndroidNotification"
                     }
                 } else {
