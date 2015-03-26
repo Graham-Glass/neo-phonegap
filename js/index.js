@@ -888,7 +888,6 @@ var app = {
         }
     },
     onAndroidNotification: function(e) {
-    	console.log('GCM event');
         switch (e.event) {
             case 'registered':
                 if (e.regid.length > 0) {
@@ -898,7 +897,7 @@ var app = {
                 }
                 break;
             case 'message':
-                console.log('Android message: ' + e.msg);
+                console.log('Android message: ' + e.message);
                 break;
             case 'error':
                 console.log('Error: ' + e.msg);
