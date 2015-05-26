@@ -666,6 +666,40 @@ var app = {
                     store.setItem('loginPasswordTemp', data.password);
                 }
                 break;
+            case 'notificationsPopup':
+                if (data.content == '1') {
+                    $('.notificationsPopUpHolder').find('.notificationsBottom span').on('click', function(data) {
+                        $.each($('.notificationsPopUpHolder').find('> div > ul li'), function() {
+                            $(this).animate({
+                                height: '0'
+                            }, 300, function() {
+                                $(this).remove();
+                                if ($('.notificationsPopUpHolder').find('> div > ul li').length == 0) {
+                                    $('.notificationsPopUpHolder').find('.notificationsBottom').hide();
+                                }
+                            });
+                        });
+                    });
+                    $('.notificationsPopUpHolder > div > ul > li > a').click(function() {
+                        $('.notificationsPopUpHolder').find('.notificationsBottom').hide();
+                    });
+                    $('.notificationsPopUpHolder > div > ul > li').each(function() {
+                        notifications_animate('.notificationsPopUpHolder .' + $(this).attr('class'));
+                    });
+                }
+                break;
+            case 'playNotificationSound':
+                if (typeof data.src != 'undefined') {
+                    var media = new Media(schoolProtocol + '://' + schoolDomain + data.src,
+                        function() {
+                            console.log('Successfully loaded media');
+                        },
+                        function(data) {
+                            console.log('Error loading media: ' + data.error);
+                        });
+                    media.play();
+                }
+                break;
             default:
                 return;
                 break;
@@ -875,7 +909,7 @@ var app = {
                 }
                 pushNotification.register(function(deviceToken) {
                     if (!navigator.userAgent.match(/Android/i)) {
-                    	store.setItem('pushToken', deviceToken);
+                        store.setItem('pushToken', deviceToken);
                         app.storeToken(deviceToken);
                     }
                     console.log(JSON.stringify(['registerDevice', deviceToken]));
@@ -897,18 +931,18 @@ var app = {
                 }
                 break;
             case 'message':
-				var item_id = /\(ID: ([0-9]*)\)$/.exec(e.message);
-				var currentSchool = store.getItem('currentSchool');
-				console.log('is alert, item_id: ' + JSON.stringify(item_id));
-				if (e.message.charAt(0) == 'M') {
-					console.log('opening ' + currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
-					app.updateStatusMessage('Loading message...');
-					$('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
-				} else {
-					console.log('opening ' + currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
-					app.updateStatusMessage('Loading notification...');
-					$('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
-				}
+                var item_id = /\(ID: ([0-9]*)\)$/.exec(e.message);
+                var currentSchool = store.getItem('currentSchool');
+                console.log('is alert, item_id: ' + JSON.stringify(item_id));
+                if (e.message.charAt(0) == 'M') {
+                    console.log('opening ' + currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+                    app.updateStatusMessage('Loading message...');
+                    $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+                } else {
+                    console.log('opening ' + currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+                    app.updateStatusMessage('Loading notification...');
+                    $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+                }
                 break;
             case 'error':
                 console.log('Error: ' + e.message);
@@ -1075,7 +1109,7 @@ function popup_clicked(element) {
         }
     }, 50);
     if ($(window).width() > 980) {
-        app.refreshHeader();
+        document.getElementById('contentFrame').contentWindow.postMessage("{\"getHeader\": \"1\"}", "*");
     }
     document.getElementById('contentFrame').contentWindow.postMessage("{\"openPopup\": \"" + $(element).attr('href') + "\"}", "*");
     return false;
@@ -1269,7 +1303,7 @@ function hc_go_to_topic(element) {
     });
     var link = $(element).attr('href').replace(schoolProtocol + '://' + schoolDomain, '');
     document.getElementById('contentFrame').contentWindow.postMessage("{\"hcGoToTopic\": \"" + link + "\"}", "*");
-    app.refreshHeader();
+    document.getElementById('contentFrame').contentWindow.postMessage("{\"getHeader\": \"1\"}", "*");
 }
 
 function tabnav_adjustment(containerId) {
@@ -1310,6 +1344,53 @@ function tabnav_adjustment(containerId) {
             $(this).toggleClass('highlight');
         });
     }
+}
+
+function notifications_animate(element) {
+    var TimeOut;
+
+    $(element).animate({
+        height: 48
+    }, 300);
+
+    TimeOut = setTimeout(function() {
+        $(element).animate({
+            height: '0'
+        }, 300, function() {
+            $(this).remove();
+            if ($('.notificationsPopUpHolder').find('> div > ul li').length == 0) {
+                $('.notificationsPopUpHolder').find('.notificationsBottom').hide();
+            }
+        });
+    }, 5000);
+
+    $(element).mouseout(function() {
+        TimeOut = setTimeout(function() {
+            $(element).animate({
+                height: '0'
+            }, 300, function() {
+                $(this).remove();
+                if ($('.notificationsPopUpHolder').find('> div > ul li').length == 0) {
+                    $('.notificationsPopUpHolder').find('.notificationsBottom').hide();
+                }
+            });
+        }, 5000);
+    });
+}
+
+function notification_mute(){
+	var el = $('.audioNotifications');
+	var enable = el.data('enable');
+	
+	document.getElementById('contentFrame').contentWindow.postMessage("{\"setNotificationSound\": \""+enable+"\"}", "*");
+	
+	if (enable == true) {
+		el.data('enable', false);
+		el.find('i').removeClass('audioOff').addClass('audioOn');
+	} else if (enable == false) {
+		el.data('enable', true);
+		el.find('i').removeClass('audioOn').addClass('audioOff');
+	}
 }
 
 $(document).ready(function() {
