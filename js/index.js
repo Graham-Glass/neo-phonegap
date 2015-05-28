@@ -933,7 +933,7 @@ var app = {
                 }
                 break;
             case 'message':
-            	if(isRunning){
+            	if(!isRunning){
 					var item_id = /\(ID: ([0-9]*)\)$/.exec(e.message);
 					var currentSchool = store.getItem('currentSchool');
 					console.log('is alert, item_id: ' + JSON.stringify(item_id));
