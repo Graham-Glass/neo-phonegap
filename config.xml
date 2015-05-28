@@ -66,6 +66,9 @@
 	<gap:plugin name="com.chanthu.evri.gcs-file-transfer" version="1.0.0" />
 	<gap:plugin name="com.phonegap.plugins.pushplugin" version="2.4.0" />
 	<gap:plugin name="org.apache.cordova.network-information" version="0.2.12" />
+	<feature name="Media">
+		<param name="android-package" value="org.apache.cordova.media.AudioHandler" />
+	</feature>
 	<gap:config-file platform="android" parent="/manifest">
      <application android:debuggable="true" />
 	</gap:config-file>
