@@ -709,12 +709,14 @@ var app = {
         document.getElementById('contentFrame').contentWindow.postMessage("{\"windowHeight\": \"" + $(window).height() + "\", \"windowWidth\": \"" + $(window).width() + "\", \"scrollTop\": \"" + $(window).scrollTop() + "\"}", "*");
     },
     onAppLaunch: function() {
+    	isRunning = true;
         //console.log('checking if file was selected');
         if (!navigator.userAgent.match(/Android/i)) {
             window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFS, app.fail);
         }
     },
     onPause: function() {
+    	isRunning = false;
         if (!navigator.userAgent.match(/Android/i)) {
             window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, app.gotFSforDelete, app.fail);
         }
@@ -931,17 +933,19 @@ var app = {
                 }
                 break;
             case 'message':
-                var item_id = /\(ID: ([0-9]*)\)$/.exec(e.message);
-                var currentSchool = store.getItem('currentSchool');
-                console.log('is alert, item_id: ' + JSON.stringify(item_id));
-                if (e.message.charAt(0) == 'M') {
-                    console.log('opening ' + currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
-                    app.updateStatusMessage('Loading message...');
-                    $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
-                } else {
-                    console.log('opening ' + currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
-                    app.updateStatusMessage('Loading notification...');
-                    $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+            	if(isRunning){
+					var item_id = /\(ID: ([0-9]*)\)$/.exec(e.message);
+					var currentSchool = store.getItem('currentSchool');
+					console.log('is alert, item_id: ' + JSON.stringify(item_id));
+					if (e.message.charAt(0) == 'M') {
+						console.log('opening ' + currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+						app.updateStatusMessage('Loading message...');
+						$('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'inbox/show?message=' + item_id[1]));
+					} else {
+						console.log('opening ' + currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+						app.updateStatusMessage('Loading notification...');
+						$('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'notifications/show?notification=' + item_id[1]));
+					}
                 }
                 break;
             case 'error':

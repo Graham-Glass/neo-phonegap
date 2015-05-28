@@ -48,6 +48,7 @@ var canLogIn = true;
 var headContent = '';
 var bodyContent = '';
 var editorContent = '';
+var isRunning = false;
 
 (function($){
  $.fn.getStyleObject = function(){
