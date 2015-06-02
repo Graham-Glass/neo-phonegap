@@ -68,6 +68,6 @@
 	<gap:plugin name="org.apache.cordova.network-information" version="0.2.12" />
 	<gap:plugin name="org.apache.cordova.media" />
 	<gap:config-file platform="android" parent="/manifest">
-     <application android:debuggable="false" />
+     <application android:debuggable="true" />
 	</gap:config-file>
 </widget>
