@@ -759,7 +759,7 @@ var app = {
             } else {
                 fileToUpload = entries[0].fullPath;
                 if (schoolDomain.length) {
-                    iframeURL = schoolProtocol + '://' + schoolDomain + '/?mobile_app=true';
+                    iframeURL = schoolProtocol + '://' + schoolDomain + '/?mobile_app=true&new_jwplayer=true';
                 } else {
                     iframeURL = loginUrl;
                 }
@@ -1025,7 +1025,7 @@ var app = {
             if (loginCredentials.length) {
                 var loginCredentialsArray = loginCredentials.split("\n");
                 console.log('loginCredentials found, opening ' + currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true'));
-                $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true'));
+                $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true&new_jwplayer=true'));
             } else {
                 $('#contentFrame').attr('src', currentSchool);
             }
