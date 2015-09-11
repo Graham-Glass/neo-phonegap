@@ -6,7 +6,7 @@ var store = window.localStorage;
 var domain = 'www.neolms.com';
 //var domainProtocol = 'http';
 var domainProtocol = 'https';
-var loginUrl = domainProtocol + '://' + domain + '/app/launch?version=' + appVersion + '&mobile_app=true&left_nav=true&new_left_nav=true&redirected=true';
+var loginUrl = domainProtocol + '://' + domain + '/app/launch?version=' + appVersion + '&mobile_app=true&left_nav=true&new_left_nav=true&redirected=true&new_jwplayer=true';
 var isFirst = true;
 var wasOffline = false;
 var isPageLoaded = false;
