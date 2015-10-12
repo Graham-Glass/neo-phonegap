@@ -434,7 +434,17 @@ var app = {
                     if (data.href.substring(0, 1) == '/') {
                         data.href = schoolProtocol + '://' + schoolDomain + data.href;
                     }
-                    window.open(data.href, '_blank', 'location=yes');
+                    newWindow = window.open(data.href, '_blank', 'location=yes');
+                    console.log('opening ' + data.href);
+                    if (typeof data.refresh_on_close != 'undefined') {
+                        newWindow.addEventListener('loadstop', function(event) {
+                            if (event.url.match(schoolDomain)) {
+                                newWindow.close();
+                                var contentFrame = document.getElementById('contentFrame');
+                                contentFrame.contentWindow.location = contentFrame.contentWindow.location.href + '&sso_native_apps_alert=false';
+                            }
+                        });
+                    }
                 }
                 break;
             case 'openChat':
@@ -698,6 +708,13 @@ var app = {
                             console.log('Error loading media: ' + data.error);
                         });
                     media.play();
+                }
+                break;
+            case 'closeSSOWindow':
+                console.log('received message to close sso window');
+                if (ssoWindow != null) {
+                    console.log('close sso window');
+                    ssoWindow.close();
                 }
                 break;
             default:
@@ -1024,10 +1041,15 @@ var app = {
             console.log('loginCredentials: ' + loginCredentials);
             if (loginCredentials.length) {
                 var loginCredentialsArray = loginCredentials.split("\n");
-                console.log('loginCredentials found, opening ' + currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true'));
-                $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true&new_jwplayer=true'));
+                if (loginCredentialsArray[0] == 'auth_token_sso') {
+                    console.log('auth token found, opening ' + currentSchool.replace('?mobile_app=true', 'log_in/submit?auth_token=' + loginCredentialsArray[1] + '&mobile_app=true'));
+                    $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?auth_token=' + loginCredentialsArray[1] + '&mobile_app=true'));
+                } else {
+                    console.log('loginCredentials found, opening ' + currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true'));
+                    $('#contentFrame').attr('src', currentSchool.replace('?mobile_app=true', 'log_in/submit?userid=' + loginCredentialsArray[0] + '&password=' + loginCredentialsArray[1] + '&mobile_app=true'));
+                }
             } else {
-                $('#contentFrame').attr('src', currentSchool + '&new_jwplayer=true');
+                $('#contentFrame').attr('src', currentSchool);
             }
             app.toggleLoader(false);
         };
@@ -1064,7 +1086,7 @@ var app = {
         var reader = new FileReader();
         reader.onloadend = function(evt) {
             console.log("Read as text");
-            var currentSchool = evt.target.result;
+            var currentSchool = evt.target.result + '&sso_native_apps=true';
             console.log('currentSchool: ' + currentSchool);
             if (currentSchool.length) {
                 $.ajax(currentSchool, {
@@ -1124,7 +1146,8 @@ function create_chat(url) {
     var chatroom_id = args['chat_room_id']; // should always be present
     var chatroom_name = (args['chat_room_name'] ? decodeURIComponent(args['chat_room_name']) : 'Chat');
     var invited_user_id = (args['invited_user_id'] || 'null');
-    var chatContainer = '<div id="chatContainer" chatroom_id="' + chatroom_id + '" invited_user_id="' + invited_user_id + '"><div class="header"><h4>' + chatroom_name.replace(/\+/g, " ").replace(/%27/g, "'") + '</h4><a href="javascript:void(0)" onclick="close_chat(' + chatroom_id + ', ' + invited_user_id + ')" class="close"></a></div><div id="chatIframe"><iframe src="' + url + '"></iframe></div></div>';
+
+    var chatContainer = '<div id="chatContainer" chatroom_id="' + chatroom_id + '"><div class="header"><h4>' + chatroom_name.replace(/\+/g, " ").replace(/%27/g, "'") + '</h4><a href="javascript:void(0)" onclick="close_chat(' + chatroom_id + ', ' + invited_user_id + ')" class="close"><i class="xCross inverted"></i></a></div><div id="chatIframe"><iframe src="' + url + '"></iframe></div></div>';
 
     if ($('#chatContainer').length > 0) {
         close_chat($('#chatContainer').attr('chatroom_id'), $('#chatContainer').attr('invited_user_id'));
@@ -1382,19 +1405,19 @@ function notifications_animate(element) {
     });
 }
 
-function notification_mute(){
-	var el = $('.audioNotifications');
-	var enable = el.data('enable');
-	
-	document.getElementById('contentFrame').contentWindow.postMessage("{\"setNotificationSound\": \""+enable+"\"}", "*");
-	
-	if (enable == true) {
-		el.data('enable', false);
-		el.find('i').removeClass('audioOff').addClass('audioOn');
-	} else if (enable == false) {
-		el.data('enable', true);
-		el.find('i').removeClass('audioOn').addClass('audioOff');
-	}
+function notification_mute() {
+    var el = $('.audioNotifications');
+    var enable = el.data('enable');
+
+    document.getElementById('contentFrame').contentWindow.postMessage("{\"setNotificationSound\": \"" + enable + "\"}", "*");
+
+    if (enable == true) {
+        el.data('enable', false);
+        el.find('i').removeClass('audioOff').addClass('audioOn');
+    } else if (enable == false) {
+        el.data('enable', true);
+        el.find('i').removeClass('audioOn').addClass('audioOff');
+    }
 }
 
 $(document).ready(function() {
