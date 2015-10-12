@@ -70,6 +70,6 @@
 	<gap:plugin name="cordova-plugin-media" source="npm" version="1.0.1" />
 	<gap:plugin name="cordova-plugin-whitelist" source="npm" version="1.0.0" />
 	<gap:config-file platform="android" parent="/manifest">
-     <application android:debuggable="true" />
+     <application android:debuggable="false" />
 	</gap:config-file>
 </widget>
