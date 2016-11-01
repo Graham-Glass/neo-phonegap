@@ -1,4 +1,4 @@
-var appVersion = '1.05';
+var appVersion = '1.06';
 
 var store = window.localStorage;
 //var domain = 'edu-20.com:3000';
