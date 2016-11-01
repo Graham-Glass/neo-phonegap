@@ -4,7 +4,7 @@
 	xmlns:gap="http://phonegap.com/ns/1.0" 
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	id="com.edu20.NEOLMS" 
-	version="1.0.3">
+	version="1.0.5">
     <name>NEO</name>
     <description>
         Get the full functionality of NEO LMS by using the IOS Mobile App. NEO is a simple, powerful LMS for schools and universities that makes it easy to deliver online education.
@@ -70,6 +70,6 @@
 	<gap:plugin name="cordova-plugin-media" source="npm" version="1.0.1" />
 	<gap:plugin name="cordova-plugin-whitelist" source="npm" version="1.0.0" />
 	<gap:config-file platform="android" parent="/manifest">
-     <application android:debuggable="false" />
+     <application android:debuggable="true" />
 	</gap:config-file>
 </widget>
